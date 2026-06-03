@@ -1,244 +1,62 @@
-# airport_db
-# Database Architecture and Schema Design
+# Airport Operations & Passenger Booking Database System
 
-## Overview
+## Project Overview
+This repository contains a fully normalized relational database schema designed to manage complex, real-time aviation ecosystems. Built using **PostgreSQL**, the system accurately models the interconnected operational lifecycle of commercial aviation, including flight management, global airport routing, passenger bookings, financial transactions, luggage weights, and airport security audits. 
 
-This section presents the complete database architecture for the Airline Management System. The database has been designed using relational database principles to efficiently manage airline operations, passenger information, flight scheduling, booking processes, baggage tracking, and security screening activities. The schema provides a structured foundation for operational reporting, business intelligence, and future analytical applications.
+The primary goal of this project is to demonstrate strong data modeling fundamentals, robust referential integrity, and structural schema design suitable for production-level database management or enterprise data analytics.
 
-The database consists of nine primary entities connected through carefully defined primary and foreign key relationships. The design follows normalization principles to minimize redundancy, maintain data integrity, and support scalable transaction processing.
+---
 
-## Entity Definitions
+## Core Database Architecture
+The database is structured into 10 highly interconnected tables handling data normalization, transactional integrity, and comprehensive audit tracking.
 
-### 1. Airlines
+### 1. Flight & Aviation Logistics
+* **`Airlines`**: Maps airline operators, industry standard codes, and countries of origin.
+* **`Airport`**: Establishes global aviation hubs with precise geographic positioning (City, State, Country).
+* **`Flights`**: The core operational table linking airlines to departure/arrival airports, tracking designated terminal gates, and comparing `scheduled` versus `actual` operational timelines.
 
-The **Airlines** table stores information about airline operators. It serves as a reference entity for all flights within the system.
+### 2. Passenger & Transaction Ecosystem
+* **`Passengers`**: Stores sensitive traveler demographic metadata, including contact foundations, date of birth, citizenship profiles, and passport identifiers.
+* **`Booking`**: Captures passenger ticket transactions, filtering sales performance by platform channels, processing tracking states, and cataloging financial valuations (`price`).
+* **`Booking_Flight`**: A dedicated junction table resolving the many-to-many relationship between individual bookings and scheduled flights.
+* **`Boarding_Pass`**: Finalizes physical seating assignments mapped directly back to transaction pathways.
 
-**Primary Key:**
+### 3. Safety, Security & Baggage Auditing
+* **`Baggage`**: Tracks physical baggage allowances, recording exact weight thresholds in kilograms (`weight_in_kg`) associated with specific passenger bookings.
+* **`Baggage_Check`**: Acts as a compliance ledger logging the outcomes of luggage processing stages mapped to both the booking and the specific passenger.
+* **`Security_Check`**: A dedicated checkpoint logging table auditing security screening verification results (`check_result`) per traveler prior to boarding area entry.
 
-* `airline_id`
+---
 
-**Attributes:**
+## Technical Database Features
+* **Referential Integrity**: Implements rigorous cascade chains and foreign key declarations to protect against orphaned operational or transaction records.
+* **Audit Synchronization Trails**: Every core transactional and administrative entity contains automatic temporal tracking fields (`created_at`, `update_at` / `update_date`) to preserve transaction timing baselines.
+* **Optimized Data Typings**: Utilizes targeted numeric precisions (such as `DECIMAL(7,2)` for financial transactions and `DECIMAL(4,2)` for baggage metrics) to guarantee storage efficiency and mathematical accuracy.
 
-* `airline_code` – unique airline identifier code.
-* `airline_name` – official airline name.
-* `airline_country` – country where the airline is registered.
-* `created_at` – record creation timestamp.
-* `update_at` – record modification timestamp.
+---
 
-This entity maintains a one-to-many relationship with the Flights table, where one airline may operate multiple flights.
+## Data Schema Quick Reference
 
+| Table Name | Primary Key | Foreign Key Relations | Key Fields |
+| :--- | :--- | :--- | :--- |
+| **`Airlines`** | `airline_id` | *None* | `airline_code`, `airline_name` |
+| **`Airport`** | `airport_id` | *None* | `airport_name`, `country`, `city` |
+| **`Flights`** | `flight_id` | `airline_id`, `departure_airport_id`, `arrival_airport_id` | `scheduled_departure`, `departing_gate`, `status` |
+| **`Passengers`** | `passenger_id` | *None* | `first_name`, `last_name`, `passport_number` |
+| **`Booking`** | `booking_id` | `passenger_id` | `booking_platform`, `status`, `price` |
+| **`Booking_Flight`** | `booking_flight_id` | `booking_id`, `flight_id` | Audit Timestamps |
+| **`Boarding_Pass`** | `boarding_pass_id` | `booking_id` | `seat` |
+| **`Baggage`** | `baggage_id` | `booking_id` | `weight_in_kg` |
+| **`Baggage_Check`** | `baggage_check_id` | `booking_id`, `passenger_id` | `check_result` |
+| **`Security_Check`** | `security_check_id` | `passenger_id` | `check_result` |
 
-### 2. Airport
+---
 
-The **Airport** table stores geographical and operational information about airports.
+## Database Setup & Initialization
 
-**Primary Key:**
+To instantiate this database schema locally in your PostgreSQL environment, execute the following commands:
 
-* `airport_id`
-
-**Attributes:**
-
-* `airport_name`
-* `country`
-* `state`
-* `city`
-* `created_at`
-* `update_at`
-
-This entity is referenced twice by the Flights table to represent both departure and arrival locations.
-
-### 3. Passengers
-
-The **Passengers** table contains demographic and identification information for travelers.
-
-**Primary Key:**
-
-* `passenger_id`
-
-**Attributes:**
-
-* `first_name`
-* `last_name`
-* `date_of_birth`
-* `gender`
-* `country_of_citizenship`
-* `country_of_residence`
-* `passport_number`
-* `created_at`
-* `update_at`
-
-This table acts as the central entity for booking, security, and baggage-related processes.
-
-### 4. Flights
-
-The **Flights** table captures both scheduled and operational flight information.
-
-**Primary Key:**
-
-* `flight_id`
-
-**Foreign Keys:**
-
-* `airline_id`
-* `departure_airport_id`
-* `arrival_airport_id`
-
-**Attributes:**
-
-* `flight_no`
-* `scheduled_departure`
-* `scheduled_arrival`
-* `departing_gate`
-* `arriving_gate`
-* `status`
-* `actual_departure`
-* `actual_arrival`
-* `created_at`
-* `update_at`
-
-The table supports operational analysis such as delay monitoring, route performance evaluation, and airline efficiency reporting.
-
-### 5. Booking
-
-The **Booking** table stores reservation information generated by passengers.
-
-**Primary Key:**
-
-* `booking_id`
-
-**Foreign Key:**
-
-* `passenger_id`
-
-**Attributes:**
-
-* `booking_platform`
-* `status`
-* `price`
-* `created_at`
-* `update_at`
-
-This entity records transactional information and serves as a bridge between passengers and their flights.
-
-### 6. Booking_Flight
-
-The **Booking_Flight** table resolves the many-to-many relationship between bookings and flights.
-
-**Primary Key:**
-
-* `booking_flight_id`
-
-**Foreign Keys:**
-
-* `booking_id`
-* `flight_id`
-
-**Attributes:**
-
-* `created_at`
-* `update_at`
-
-This design allows a single booking to contain multiple flight segments while enabling a flight to be associated with multiple passenger bookings.
-
-### 7. Baggage
-
-The **Baggage** table manages checked baggage information.
-
-**Primary Key:**
-
-* `baggage_id`
-
-**Foreign Key:**
-
-* `booking_id`
-
-**Attributes:**
-
-* `weight_in_kg`
-* `created_date`
-* `update_date`
-
-This table enables baggage tracking and weight-based operational analytics.
-
-### 8. Baggage_Check
-
-The **Baggage_Check** table records baggage screening results.
-
-**Primary Key:**
-
-* `baggage_check_id`
-
-**Foreign Keys:**
-
-* `booking_id`
-* `passenger_id`
-
-**Attributes:**
-
-* `check_result`
-* `created_at`
-* `update_at`
-
-The table supports compliance monitoring and baggage security auditing.
-
-### 9. Security_Check
-
-The **Security_Check** table stores passenger security screening outcomes.
-
-**Primary Key:**
-
-* `security_check_id`
-
-**Foreign Key:**
-
-* `passenger_id`
-
-**Attributes:**
-
-* `check_result`
-* `created_at`
-* `update_at`
-
-This entity provides traceability for passenger security clearance processes.
-
-
-## Data Profiles and Data Type Selection
-
-The database employs carefully selected data types to ensure accuracy, consistency, and storage efficiency.
-
-| Data Type                   | Purpose                                                   |
-| --------------------------- | --------------------------------------------------------- |
-| INTEGER                     | Primary keys and foreign key references                   |
-| VARCHAR(50)                 | Names, codes, statuses, locations, and textual attributes |
-| DECIMAL(7,2)                | Booking prices and financial values                       |
-| DECIMAL(4,2)                | Baggage weight measurements                               |
-| DATE                        | Passenger birth dates                                     |
-| TIMESTAMP WITHOUT TIME ZONE | Operational event timestamps and audit fields             |
-
-Timestamp attributes are implemented across all major entities to support data lineage, change tracking, and temporal analysis.
-
-
-## Referential Integrity and Relationships
-
-The database architecture enforces referential integrity through foreign key constraints:
-
-* A passenger can create multiple bookings.
-* A booking belongs to exactly one passenger.
-* A booking can contain multiple flights through the Booking_Flight bridge table.
-* A flight can be associated with multiple bookings.
-* Each flight is operated by one airline.
-* Each flight references one departure airport and one arrival airport.
-* A booking may contain multiple baggage records.
-* Baggage checks are linked to both bookings and passengers.
-* Security checks are performed on passengers.
-
-These relationships ensure consistency across operational processes and eliminate data anomalies.
-
-
-## Analytical Capabilities
-Beyond the structural schema, this project implements complex data analysis scripts to extract business intelligence, including:
-* **Multi-Table Relational Joins:** Advanced use of INNER, LEFT, FULL OUTER, and CROSS joins to cross-reference passenger itineraries with flight schedules.
-* **Revenue Optimization:** Isolation of the top 10 most profitable flight routes and statistical breakdowns of performance across booking platforms.
-* **Advanced Window Functions:** Utilization of `ROW_NUMBER()`, `RANK()`, `LEAD()`, and `LAG()` to audit gate availability timelines and sequence individual passenger purchase histories.
-* 
-The resulting database architecture provides a scalable and normalized foundation suitable for airline operational systems, business intelligence dashboards, and advanced data analytics applications.
+1. **Clone the Repository:**
+   ```bash
+   git clone [https://github.com/your-username/your-repository-name.git](https://github.com/your-username/your-repository-name.git)
+   cd your-repository-name
