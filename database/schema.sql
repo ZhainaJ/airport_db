@@ -1,12 +1,7 @@
--- ============================================================================
--- PROJECT: Airport Operations & Passenger Booking Database System
--- FILE: database/schema.sql
--- DESCRIPTION: Core structural relational definitions and constraint schemas
--- ============================================================================
+Airport Operations & Passenger Booking Database
+Schema Definition
 
--- ----------------------------------------------------------------------------
--- 1. CLEANUP / IDEMPOTENCY LAYER
--- ----------------------------------------------------------------------------
+-- Drop existing tables
 DROP TABLE IF EXISTS boarding_pass CASCADE;
 DROP TABLE IF EXISTS booking_flight CASCADE;
 DROP TABLE IF EXISTS baggage_check CASCADE;
@@ -19,10 +14,10 @@ DROP TABLE IF EXISTS airport CASCADE;
 DROP TABLE IF EXISTS passengers CASCADE;
 
 -- ----------------------------------------------------------------------------
--- 2. INDEPENDENT ENTITY TABLES (No Foreign Key Dependencies)
+-- Core tables
 -- ----------------------------------------------------------------------------
 
--- A. Passengers Table
+-- Passengers
 CREATE TABLE passengers (
     passenger_id INT,
     first_name VARCHAR(50),
@@ -36,7 +31,7 @@ CREATE TABLE passengers (
     update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- B. Airport Hubs Table
+-- Airports
 CREATE TABLE airport (
     airport_id INT,
     airport_name VARCHAR(50),
@@ -47,7 +42,7 @@ CREATE TABLE airport (
     update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- C. Airlines Table
+-- Airlines
 CREATE TABLE airlines (
     airline_id INT,
     airline_code VARCHAR(50),
@@ -58,10 +53,10 @@ CREATE TABLE airlines (
 );
 
 -- ----------------------------------------------------------------------------
--- 3. DEPENDENT ENTITY TABLES (Contains Direct Core Relations)
+-- Operational tables
 -- ----------------------------------------------------------------------------
 
--- D. Flights Table
+-- Flights
 CREATE TABLE flights (
     flight_id INT,
     flight_no VARCHAR(50),
@@ -79,7 +74,7 @@ CREATE TABLE flights (
     update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- E. Booking Transactions Table
+-- Bookings
 CREATE TABLE booking (
     booking_id INT,
     passenger_id INT,
@@ -90,7 +85,7 @@ CREATE TABLE booking (
     update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- F. Boarding Pass Table
+-- Boarding passes
 CREATE TABLE boarding_pass (
     boarding_pass_id INT,
     seat VARCHAR(50),
@@ -99,7 +94,7 @@ CREATE TABLE boarding_pass (
     update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- G. Baggage Inventory Table
+-- Baggage
 CREATE TABLE baggage (
     baggage_id INT,
     weight_in_kg DECIMAL(4,2),
@@ -109,10 +104,10 @@ CREATE TABLE baggage (
 );
 
 -- ----------------------------------------------------------------------------
--- 4. JUNCTION & COMPLIANCE LEDGERS
+-- Relationship and tracking tables
 -- ----------------------------------------------------------------------------
 
--- H. Booking to Flight Flight Mapping (Many-to-Many Bridge)
+-- Booking ↔ Flight mapping
 CREATE TABLE booking_flight (
     booking_flight_id INT,
     booking_id INT,
@@ -121,7 +116,7 @@ CREATE TABLE booking_flight (
     update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- I. Baggage Compliance Audit Table
+-- Baggage checks
 CREATE TABLE baggage_check (
     baggage_check_id INT,
     check_result VARCHAR(50),
@@ -131,7 +126,7 @@ CREATE TABLE baggage_check (
     update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- J. Passenger Security Clearance Table
+-- Security checks
 CREATE TABLE security_check (
     security_check_id INT,
     check_result VARCHAR(50),
@@ -141,7 +136,7 @@ CREATE TABLE security_check (
 );
 
 -- ----------------------------------------------------------------------------
--- 5. PRIMARY KEY CONSTRAINTS ENFORCEMENT
+-- Primary keys
 -- ----------------------------------------------------------------------------
 ALTER TABLE passengers ADD PRIMARY KEY (passenger_id);
 ALTER TABLE airport ADD PRIMARY KEY (airport_id);
@@ -155,28 +150,28 @@ ALTER TABLE baggage_check ADD PRIMARY KEY (baggage_check_id);
 ALTER TABLE security_check ADD PRIMARY KEY (security_check_id);
 
 -- ----------------------------------------------------------------------------
--- 6. REFERENTIAL INTEGRITY & FOREIGN KEY DECLARATIONS
+-- Foreign keys
 -- ----------------------------------------------------------------------------
 
--- Flights Relations
+-- Flights
 ALTER TABLE flights ADD CONSTRAINT fk_flights_airline FOREIGN KEY (airline_id) REFERENCES airlines(airline_id);
 ALTER TABLE flights ADD CONSTRAINT fk_flights_departure FOREIGN KEY (departure_airport_id) REFERENCES airport(airport_id);
 ALTER TABLE flights ADD CONSTRAINT fk_flights_arrival FOREIGN KEY (arrival_airport_id) REFERENCES airport(airport_id);
 
--- Booking Transaction Relations
+-- Bookings
 ALTER TABLE booking ADD CONSTRAINT fk_booking_passenger FOREIGN KEY (passenger_id) REFERENCES passengers(passenger_id);
 
--- Boarding Logistics Relations
+-- Boarding passes
 ALTER TABLE boarding_pass ADD CONSTRAINT fk_boarding_booking FOREIGN KEY (booking_id) REFERENCES booking(booking_id);
 
--- Baggage & Weight Asset Relations
+-- Baggage
 ALTER TABLE baggage ADD CONSTRAINT fk_baggage_booking FOREIGN KEY (booking_id) REFERENCES booking(booking_id);
 
--- Flight Mapping Bridge Relations
+-- Booking-flight relationships
 ALTER TABLE booking_flight ADD CONSTRAINT fk_bridge_booking FOREIGN KEY (booking_id) REFERENCES booking(booking_id);
 ALTER TABLE booking_flight ADD CONSTRAINT fk_bridge_flight FOREIGN KEY (flight_id) REFERENCES flights(flight_id);
 
--- Operational Compliance Check Relations
+-- Security and baggage checks
 ALTER TABLE baggage_check ADD CONSTRAINT fk_baggage_check_passenger FOREIGN KEY (passenger_id) REFERENCES passengers(passenger_id);
 ALTER TABLE baggage_check ADD CONSTRAINT fk_baggage_check_booking FOREIGN KEY (booking_id) REFERENCES booking(booking_id);
 ALTER TABLE security_check ADD CONSTRAINT fk_security_passenger FOREIGN KEY (passenger_id) REFERENCES passengers(passenger_id);
