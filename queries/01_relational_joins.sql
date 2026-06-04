@@ -1,13 +1,10 @@
--- ============================================================================
 -- PROJECT: Airport Operations & Passenger Booking Database System
 -- FILE: queries/01_relational_joins.sql
 -- DESCRIPTION: Core relational join scripts demonstrating data integrity
--- ============================================================================
 
--- ----------------------------------------------------------------------------
--- QUERY 01: Inner Join - Flights and Departure Airport Mapping
+
+-- QUERY 1: Inner Join - Flights and Departure Airport Mapping
 -- OBJECTIVE: Extract flight IDs along with their valid departure country for a specific date range.
--- ----------------------------------------------------------------------------
 SELECT
     f.flight_id,
     a.country,
@@ -20,10 +17,8 @@ WHERE f.scheduled_departure BETWEEN '2023-05-01' AND '2023-05-31';
 -- returned, preserving strict data continuity boundaries.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 02: Left Join - Departing Flight Volume Analysis per Airport
+-- QUERY 2: Left Join - Departing Flight Volume Analysis per Airport
 -- OBJECTIVE: Count all departing flights per airport, ensuring hubs with zero departures are included.
--- ----------------------------------------------------------------------------
 SELECT
     a.airport_name,
     COUNT(f.flight_id) AS departing_flights
@@ -36,10 +31,8 @@ ORDER BY a.airport_name;
 -- receive a default counting weight mapping value of 0.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 03: Left Join - Passenger Booking Coverage Audit
+-- QUERY 3: Left Join - Passenger Booking Coverage Audit
 -- OBJECTIVE: List all registered passengers paired with their booking transaction IDs, if any.
--- ----------------------------------------------------------------------------
 SELECT
     CONCAT(p.first_name, ' ', p.last_name) AS passenger,
     b.booking_id
@@ -50,10 +43,8 @@ LEFT JOIN booking b ON p.passenger_id = b.passenger_id;
 -- or non-booking flyers show up with a blank transaction row marker.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 04: Full Outer Join - Airline and Scheduled Flight Cross-Audit
+-- QUERY 4: Full Outer Join - Airline and Scheduled Flight Cross-Audit
 -- OBJECTIVE: Map all airlines to their scheduled flights, exposing orphan records on either side.
--- ----------------------------------------------------------------------------
 SELECT
     a.airline_name,
     f.flight_id
@@ -65,10 +56,8 @@ ORDER BY a.airline_name;
 -- without flights as well as flights missing structural airline assignments.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 05: Cross Join - Cross-Border Combinatorial Destination Paths
+-- QUERY 5: Cross Join - Cross-Border Combinatorial Destination Paths
 -- OBJECTIVE: Generate every possible combination of airlines and foreign target destination countries.
--- ----------------------------------------------------------------------------
 SELECT
     a.airline_name,
     ar.country AS destination_country
@@ -83,10 +72,8 @@ ORDER BY a.airline_name, ar.country;
 -- airlines table with every single row from the airport matrix.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 06: Inner Join (Self-Join) - Concurrent Gate Departure Audits
+-- QUERY 6: Inner Join (Self-Join) - Concurrent Gate Departure Audits
 -- OBJECTIVE: Locate separate flights departing from the same airport on the exact same date.
--- ----------------------------------------------------------------------------
 SELECT
     f1.flight_no AS flight_1,
     f2.flight_no AS flight_2,
@@ -101,10 +88,8 @@ INNER JOIN flights f2 ON f1.departure_airport_id = f2.departure_airport_id
 -- duplicate reflective pairings and blocks a flight from pairing with itself.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 07: Multi-Table Inner Join - Comprehensive Passenger Manifest
+-- QUERY 7: Multi-Table Inner Join - Comprehensive Passenger Manifest
 -- OBJECTIVE: Trace an uninterrupted data chain linking passengers directly to their operating airlines.
--- ----------------------------------------------------------------------------
 SELECT
     CONCAT(p.first_name, ' ', p.last_name) AS passenger_fullname,
     f.flight_id,
@@ -119,10 +104,8 @@ INNER JOIN airlines a ON f.airline_id = a.airline_id;
 -- piece of the structural constraint chain is broken or missing.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 08: Left Join - Airport Arrival Schedule Grid
+-- QUERY 8: Left Join - Airport Arrival Schedule Grid
 -- OBJECTIVE: Map all global terminal positions to their inbound scheduled arrival dates.
--- ----------------------------------------------------------------------------
 SELECT
     a.airport_name,
     f.scheduled_arrival
@@ -133,10 +116,8 @@ LEFT JOIN flights f ON a.airport_id = f.arrival_airport_id;
 -- no inbound traffic streams remain visible on the dashboard grid.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 09: Left Join - Seating Document Validation Link
+-- QUERY 9: Left Join - Seating Document Validation Link
 -- OBJECTIVE: Verify physical seating assignments against their master booking transactions.
--- ----------------------------------------------------------------------------
 SELECT
     bp.boarding_pass_id,
     bp.seat,
@@ -150,10 +131,8 @@ LEFT JOIN booking b ON bp.booking_id = b.booking_id;
 -- passes that might be unlinked from active administrative booking files.
 
 
--- ----------------------------------------------------------------------------
 -- QUERY 10: Complex Condition Manifest - 2024 Travel Audit
 -- OBJECTIVE: Extract all passenger names and confirmed seats for flights scheduled in 2024.
--- ----------------------------------------------------------------------------
 SELECT
     CONCAT(p.first_name, ' ', p.last_name) AS passenger_fullname,
     bp.seat
