@@ -1,13 +1,9 @@
--- ============================================================================
 -- PROJECT: Airport Operations & Passenger Booking Database System
 -- FILE: queries/02_advanced_analytics.sql
 -- DESCRIPTION: Advanced business intelligence and window analytics scripts
--- ============================================================================
 
--- ----------------------------------------------------------------------------
--- QUERY 01: Platform Metrics Aggregation
+-- QUERY 1: Platform Metrics Aggregation
 -- OBJECTIVE: Analyze transaction distributions across different booking channels.
--- ----------------------------------------------------------------------------
 SELECT 
     booking_platform, 
     COUNT(*) AS total_bookings, 
@@ -19,10 +15,8 @@ GROUP BY booking_platform;
 -- aggregate counters and financial averages.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 02: Destination Traffic Volume
+-- QUERY 2: Destination Traffic Volume
 -- OBJECTIVE: Measure terminal performance based on total inbound flight arrivals.
--- ----------------------------------------------------------------------------
 SELECT 
     a.airport_name, 
     COUNT(f.flight_id) AS arrived_flights
@@ -34,10 +28,8 @@ GROUP BY a.airport_name;
 -- aggregate volume counters per global aviation hub.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 03: High-Performing Platform Filter (Subquery & HAVING)
+-- QUERY 3: High-Performing Platform Filter (Subquery & HAVING)
 -- OBJECTIVE: Isolate active channels processing metrics above global benchmarks.
--- ----------------------------------------------------------------------------
 SELECT 
     booking_platform, 
     COUNT(*) AS total_bookings, 
@@ -55,10 +47,8 @@ HAVING COUNT(*) >= 2
 -- drop platforms that underperform compared to the global enterprise baseline.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 04: Premium Carrier Identification
+-- QUERY 4: Premium Carrier Identification
 -- OBJECTIVE: Locate airlines whose pricing tier exceeds the global standard.
--- ----------------------------------------------------------------------------
 SELECT 
     al.airline_name, 
     AVG(b.price) AS avg_ticket_price
@@ -73,10 +63,8 @@ HAVING AVG(b.price) > (SELECT AVG(price) FROM booking);
 -- conditional evaluations to pinpoint premium flight options.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 05: Revenue Optimization - Top 10 Routes
+-- QUERY 5: Revenue Optimization - Top 10 Routes
 -- OBJECTIVE: Highlight the 10 most profitable travel corridors with proven volume.
--- ----------------------------------------------------------------------------
 SELECT 
     dep.airport_name || ' -> ' || arr.airport_name AS route,
     COUNT(b.booking_id) AS total_bookings,
@@ -94,11 +82,8 @@ LIMIT 10;
 -- MECHANICS: String concatenation merges geographic endpoints. The results are 
 -- mathematically ordered by total yields and truncated via a row-count constraint.
 
-
--- ----------------------------------------------------------------------------
--- QUERY 06: Window Function - Passenger Purchase Chronology
+-- QUERY 6: Window Function - Passenger Purchase Chronology
 -- OBJECTIVE: Sequentially number transactions for every unique flyer profile.
--- ----------------------------------------------------------------------------
 SELECT 
     CONCAT(p.first_name, ' ', p.last_name) AS passenger_fullname,
     b.booking_id,
@@ -110,10 +95,8 @@ INNER JOIN booking b ON p.passenger_id = b.passenger_id;
 -- for each customer window, tracking chronological purchasing habits over time.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 07: Window Function - Internal Flight Ticket Ranking
+-- QUERY 7: Window Function - Internal Flight Ticket Ranking
 -- OBJECTIVE: Rank ticket sales values inside each individual flight compartment.
--- ----------------------------------------------------------------------------
 SELECT 
     bf.flight_id,
     b.booking_id,
@@ -126,10 +109,8 @@ INNER JOIN booking b ON bf.booking_id = b.booking_id;
 -- positions by cost. Duplicate values receive identical ranks, leaving a gap for subsequent positions.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 08: Window Function - Look-Ahead Gate Departure Timelines
+-- QUERY 8: Window Function - Look-Ahead Gate Departure Timelines
 -- OBJECTIVE: Map consecutive departures at the same terminal gate to prevent scheduling conflicts.
--- ----------------------------------------------------------------------------
 SELECT 
     departure_airport_id, 
     departing_gate, 
@@ -144,10 +125,8 @@ FROM flights;
 -- a clear chronological preview of downstream gate commitments.
 
 
--- ----------------------------------------------------------------------------
--- QUERY 09: Window Function - Look-Behind Carrier Operational Cadence
+-- QUERY 9: Window Function - Look-Behind Carrier Operational Cadence
 -- OBJECTIVE: Check elapsed timeline intervals between sequential flights for each airline.
--- ----------------------------------------------------------------------------
 SELECT 
     airline_id, 
     flight_id, 
@@ -162,10 +141,8 @@ FROM flights;
 -- airline boundary partition to analyze fleet turnaround pacing.
 
 
--- ----------------------------------------------------------------------------
 -- QUERY 10: Nested Window Analysis - Fleet Capacity Leaderboard
 -- OBJECTIVE: Calculate absolute flight volumes per carrier and rank them globally.
--- ----------------------------------------------------------------------------
 SELECT 
     airline_name, 
     flight_count,
