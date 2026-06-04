@@ -1,5 +1,5 @@
-Airport Operations & Passenger Booking Database
-Schema Definition
+--Airport Operations & Passenger Booking Database
+--Schema Definition
 
 -- Drop existing tables
 DROP TABLE IF EXISTS boarding_pass CASCADE;
@@ -13,9 +13,8 @@ DROP TABLE IF EXISTS airlines CASCADE;
 DROP TABLE IF EXISTS airport CASCADE;
 DROP TABLE IF EXISTS passengers CASCADE;
 
--- ----------------------------------------------------------------------------
 -- Core tables
--- ----------------------------------------------------------------------------
+
 
 -- Passengers
 CREATE TABLE passengers (
@@ -52,9 +51,8 @@ CREATE TABLE airlines (
     update_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- ----------------------------------------------------------------------------
+
 -- Operational tables
--- ----------------------------------------------------------------------------
 
 -- Flights
 CREATE TABLE flights (
@@ -103,9 +101,8 @@ CREATE TABLE baggage (
     update_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ----------------------------------------------------------------------------
+
 -- Relationship and tracking tables
--- ----------------------------------------------------------------------------
 
 -- Booking ↔ Flight mapping
 CREATE TABLE booking_flight (
@@ -135,9 +132,7 @@ CREATE TABLE security_check (
     update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ----------------------------------------------------------------------------
 -- Primary keys
--- ----------------------------------------------------------------------------
 ALTER TABLE passengers ADD PRIMARY KEY (passenger_id);
 ALTER TABLE airport ADD PRIMARY KEY (airport_id);
 ALTER TABLE airlines ADD PRIMARY KEY (airline_id);
@@ -149,9 +144,7 @@ ALTER TABLE booking_flight ADD PRIMARY KEY (booking_flight_id);
 ALTER TABLE baggage_check ADD PRIMARY KEY (baggage_check_id);
 ALTER TABLE security_check ADD PRIMARY KEY (security_check_id);
 
--- ----------------------------------------------------------------------------
 -- Foreign keys
--- ----------------------------------------------------------------------------
 
 -- Flights
 ALTER TABLE flights ADD CONSTRAINT fk_flights_airline FOREIGN KEY (airline_id) REFERENCES airlines(airline_id);
